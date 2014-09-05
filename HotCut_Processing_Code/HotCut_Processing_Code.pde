@@ -58,7 +58,7 @@ GLabel lblFile;
 GButton btnInput;
 
 void setup ()
-{ 
+{ /*
   //Code für Kommunikation zwischen Processing und Arduino
   Serial serial = new Serial(this, "COM13", 19200);//"Name vom Port" muss die Name des Ports zwichen Arduino-Software und Arduino-Board
   ValueSender sender = new ValueSender(this, serial);
@@ -77,7 +77,7 @@ void setup ()
   sender.observe("KW");
   sender.observe("KL");
   receiver.observe("KCUT");
-
+*/
 
   size (800, 600);                //Grösse der Arbeitsfläche       
   frame.setResizable(true);      //eventl. mit % bestimmen??
