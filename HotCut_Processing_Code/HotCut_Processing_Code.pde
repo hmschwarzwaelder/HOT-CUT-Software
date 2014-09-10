@@ -12,7 +12,7 @@ import javax.swing.JFrame;
 ControlP5 cp5;
 
 //Variablen
-String name;
+String name, ChoosedFile;
 
 boolean styrodurpressed = false;
 boolean styroporpressed = false;
@@ -31,7 +31,7 @@ public int Temperatur, Speed, RoGo, RuGo, RrGo, RlGo;
 public int moveBGo, cutMovBGo;
 public int KX, KY, KW, KL, KCUT;
 
-PFont myFontUebersft, myFontUuebersft, myFontNormsft, myFontKleinsft;
+PFont myFontUebersft, myFontUuebersft, myFontNormsft, myFontKleinsft, myFont, myFontitalic, myFontsmall, myFontFileName;
 
 PShape LogoHotCut; 
 PShape thermWire;
@@ -60,24 +60,24 @@ GButton btnInput;
 void setup ()
 { /*
   //Code für Kommunikation zwischen Processing und Arduino
-  Serial serial = new Serial(this, "COM13", 19200);//"Name vom Port" muss die Name des Ports zwichen Arduino-Software und Arduino-Board
-  ValueSender sender = new ValueSender(this, serial);
-  ValueReceiver receiver = new ValueReceiver(this, serial);
-  sender.observe("Temperatur");
-  sender.observe("Speed");
-  sender.observe("RoGo");
-  sender.observe("RuGo");
-  sender.observe("RrGo");
-  sender.observe("RlGo");
-  sender.observe("moveBGo");
-  sender.observe("cutMovBGo");
-  sender.observe("KCUT");
-  sender.observe("KX");
-  sender.observe("KY");
-  sender.observe("KW");
-  sender.observe("KL");
-  receiver.observe("KCUT");
-*/
+ Serial serial = new Serial(this, "COM13", 19200);//"Name vom Port" muss die Name des Ports zwichen Arduino-Software und Arduino-Board
+ ValueSender sender = new ValueSender(this, serial);
+ ValueReceiver receiver = new ValueReceiver(this, serial);
+ sender.observe("Temperatur");
+ sender.observe("Speed");
+ sender.observe("RoGo");
+ sender.observe("RuGo");
+ sender.observe("RrGo");
+ sender.observe("RlGo");
+ sender.observe("moveBGo");
+ sender.observe("cutMovBGo");
+ sender.observe("KCUT");
+ sender.observe("KX");
+ sender.observe("KY");
+ sender.observe("KW");
+ sender.observe("KL");
+ receiver.observe("KCUT");
+ */
 
   size (800, 600);                //Grösse der Arbeitsfläche       
   frame.setResizable(true);      //eventl. mit % bestimmen??
@@ -97,6 +97,10 @@ void setup ()
   myFontUuebersft= createFont("Verdana", 11);
   myFontNormsft= createFont("Verdana", 11);
   myFontKleinsft= createFont("Verdana", 10);  
+  myFontitalic= createFont("Verdana Italic", 14); 
+  myFont = createFont("Verdana", 11);
+  myFontsmall= createFont("Verdana", 10);
+  myFontFileName = createFont("Verdana", 9);
 
   //Nutzung der Classes
   fGetStarted = new Menufenster(40.1, 75.1, 280, 100);
@@ -345,13 +349,13 @@ void draw() {
     moveBGo = 0;
     cutMovBGo = 0;
   }
-  if(cutXYBpressed) {
+  if (cutXYBpressed) {
     cutXYB.currentcolor = cutXYB.pressedcolor;
-      }
+  }
   if (KCUT < 1) {
     cutXYBpressed = false;
   }
-    
+
   if (mousePressed == true && Ro.over()) {
     RoGo = 2;
   } else { 
@@ -372,7 +376,7 @@ void draw() {
   } else { 
     RrGo = 0;
   }
- 
+
 
   KX = int(cp5.get(Textfield.class, " ").getText());
   KY = int(cp5.get(Textfield.class, "  ").getText());
@@ -380,6 +384,8 @@ void draw() {
   KL = int(cp5.get(Textfield.class, "    ").getText());
 
   text();//Text wird angezeigt
+  PreviewFileName();
+
   print("KX : ");
   println(KX);
   print("KY : ");
@@ -437,56 +443,15 @@ void mousePressed() {
     cutMovBpressed = false;
     moveBpressed = false;
     KCUT = 2;
-      }
+  }
   if (buttonSearch.over()) {
     buttonsearchpressed = true;
   }
-
-  if  (buttonSearch.over()) {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setCurrentDirectory(new File("."));
-    chooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
-      public boolean accept(File f) {
-        return f.getName().toLowerCase().endsWith(".svg")
-          || f.isDirectory();
-      }
-      public String getDescription() {
-        return "SVG Images";
-      }
-    }
-    );
-
-
-    int returnVal = chooser.showOpenDialog(new JFrame());
-    if (returnVal == JFileChooser.APPROVE_OPTION) 
-    { 
-      File file = chooser.getSelectedFile();
-      String name = chooser.getSelectedFile().getName();
-      System.out.println("You chose to open this file: " + name);
-      buttonsearchpressed = true;
-    }
-    review = loadShape(name);
-    shape(review, 500, 400);
-  }
 }
-/* // V1
- void mouseClicked() {
- if (buttonSearch.over()) {
- selectInput("Select a file to process:", "fileSelected");
- }
- }
+//Version 1
+/*
+void mousePressed() {
  
- void fileSelected(File selection) {
- if (selection == null ) {
- println("Window was closed or the user hit cancel.");
- } else {
- println("User selected " + selection.getAbsolutePath());
- }
- }
- */
-
-/*//V2
- void mouseClicked() {
  if  (buttonSearch.over()) {
  JFileChooser chooser = new JFileChooser();
  chooser.setCurrentDirectory(new File("."));
@@ -501,61 +466,68 @@ void mousePressed() {
  }
  );
  
- 
  int returnVal = chooser.showOpenDialog(new JFrame());
  if (returnVal == JFileChooser.APPROVE_OPTION) 
  { 
  File file = chooser.getSelectedFile();
- String name = chooser.getSelectedFile().getName();
- System.out.println("You chose to open this file: " + name);
- 
- }
+ String ChoosedFile = chooser.getSelectedFile().getName();
+ System.out.println("You chose to open this file: " + ChoosedFile);
  }
  
- }
- void review() {
- if (name != null) {
- review = loadShape(name);
- shape(review, 500, 400);
  }
  }
  */
 
 
 
+//Version 2
+
+void mouseClicked() {
+  if (buttonSearch.over()) {
+    selectInput("Select a file to process:", "fileSelected");
+  }
+}
+
+void fileSelected(File selection) {
+  if (selection == null ) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    println("File selected : " + selection.getAbsolutePath());
+    ChoosedFile = selection.getAbsolutePath();
+  }
+}
+
+
 /*
-public void handleButtonEvents(GButton button, GEvent event) { 
- // Folder selection
- if ( button == btnInput )
- handleFileDialog(button);
- }
+//Version 3
  
- // G4P code for folder and file dialogs
- public void handleFileDialog(GButton button) {
- 
- // Folder selection
- 
- // File input selection
- if (button == btnInput) {
- // Use file filter if possible
- fname = G4P.selectInput("Input Dialog", ",svg", "Image files");
+ void mouseClicked() {
+ if (buttonSearch.over()) {
+ String fname = G4P.selectInput("Input Dialog", "svg", "Image files");
  lblFile.setText(fname);
  review = loadShape(fname);
- shape(review, 500, 400);
- }
- }
- */
-
-/*
-void mouseClicked() {
- if (buttonSearch.over()) {
- fname = G4P.selectInput("Input Dialog", "svg", "Image files");
- lblFile.setText(fname);
- //review = loadShape(fname);
  shape(review, 500, 500);
  }
  }
  */
+void PreviewFileName() {
+  if (ChoosedFile == null) {
+    textFont(myFontFileName);
+    fill(255);
+    text("No File Selected", 385, 145);
+  } else {
+    textFont(myFontFileName);
+    fill(255);
+    textAlign(LEFT, TOP);
+    text(ChoosedFile, 382, 125, 90, 80);
+    review = loadShape(ChoosedFile);
+    review.disableStyle();
+    noFill(); 
+    stroke(231, 62, 32);
+    shape(review, 390, 340, 337, (337*review.height)/review.width);
+  }
+}
+
 void text() {
 
   textFont(myFontUebersft);             //schreib einen text mit (...) format

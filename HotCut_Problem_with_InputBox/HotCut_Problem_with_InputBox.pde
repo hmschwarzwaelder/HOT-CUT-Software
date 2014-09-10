@@ -3,7 +3,17 @@ import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import g4p_controls.*;
+import processing.serial.*;
 import geomerative.*;
+
+// Part of Styrosimulation
+Serial serialPort;
+RPoint[] points;
+int i = 0;
+float scaleFactor = 1;
+int msgQueue[];
+int lstMsg;
+int wait = 0;
 
 Menufenster fUpload, fStart;
 SearchFenster fileUpload;
@@ -15,12 +25,15 @@ ManConButtons cutStartB;
 GLabel lblFile;
 
 
-PFont myFont, myFontitalic, myFontsmall;
+PFont myFont, myFontitalic, myFontsmall, myFontFileName, DrawFont;
 PShape review;
-String name;
+String name, ChoosedFile;
 
 void setup ()
 { 
+  // Part of Styrosimulation
+  msgQueue = new int[0];
+
   size (800, 600);                   
   smooth();       
 
@@ -33,7 +46,9 @@ void setup ()
   myFontitalic= createFont("Verdana Italic", 14); 
   myFont= createFont("Verdana", 11);
   myFontsmall= createFont("Verdana", 10);
+  myFontFileName = createFont("Verdana", 9);
 
+  DrawFont = createFont("Verdana", 14);
 
   lblFile = new GLabel(this, 374, 122, 102, 39);
   lblFile.setTextAlign(GAlign.MIDDLE, GAlign.MIDDLE);
@@ -58,6 +73,7 @@ void draw()
   line(489, 158, 507, 158);               
 
   text();
+  PreviewFileName();
 }
 void text() 
 {
@@ -79,46 +95,73 @@ void text()
   fill(157);                
   textAlign(LEFT);                  
   text ("(      .svg)", 483, 159);
+  //text(File, 483, 159);
 }
 
+void PreviewFileName() {
+  if (ChoosedFile == null) {
+    textFont(myFontFileName);
+    fill(255);
+    text("No File Selected", 385, 145);
+  } else {
+    textFont(myFontFileName);
+    fill(255);
+    textAlign(LEFT, TOP);
+    text(ChoosedFile, 382, 125, 90, 80);
+    review = loadShape(ChoosedFile);
+    review.disableStyle();
+    noFill(); 
+    stroke(231, 62, 32);
+    shape(review, 390, 340, 337, (337*review.height)/review.width);
+  }
+}
 /*
-//Version 1
- 
- void mousePressed() {
- 
- if  (buttonSearch.over()) {
- JFileChooser chooser = new JFileChooser();
- chooser.setCurrentDirectory(new File("."));
- chooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
- public boolean accept(File f) {
- return f.getName().toLowerCase().endsWith(".svg")
- || f.isDirectory();
- }
- public String getDescription() {
- return "SVG Images";
- }
- }
- );
- 
- int returnVal = chooser.showOpenDialog(new JFrame());
- if (returnVal == JFileChooser.APPROVE_OPTION) 
- { 
- File file = chooser.getSelectedFile();
- String name = chooser.getSelectedFile().getName();
- System.out.println("You chose to open this file: " + name);
- 
- }
- review = loadShape(name);
- shape(review, 500, 400);
- }
+void PreviewCutting() {
+ RG.init(this);
+ RShape objShape = RG.loadShape(File);
+ points = objShape.getPoints();
+ if (wait == 0) {
+ delay(1000);
+ wait = 1;
  }
  */
 
 
+//Version 1
 /*
+void mousePressed() {
+
+  if  (buttonSearch.over()) {
+    JFileChooser chooser = new JFileChooser();
+    chooser.setCurrentDirectory(new File("."));
+    chooser.setFileFilter(new javax.swing.filechooser.FileFilter() {
+      public boolean accept(File f) {
+        return f.getName().toLowerCase().endsWith(".svg")
+          || f.isDirectory();
+      }
+      public String getDescription() {
+        return "SVG Images";
+      }
+    }
+    );
+
+    int returnVal = chooser.showOpenDialog(new JFrame());
+    if (returnVal == JFileChooser.APPROVE_OPTION) 
+    { 
+      File file = chooser.getSelectedFile();
+      String ChoosedFile = chooser.getSelectedFile().getName();
+      System.out.println("You chose to open this file: " + ChoosedFile);
+    }
+    
+  }
+}
+*/
+
+
+
 //Version 2
- 
- void mouseClicked() {
+
+void mouseClicked() {
  if (buttonSearch.over()) {
  selectInput("Select a file to process:", "fileSelected");
  }
@@ -128,23 +171,24 @@ void text()
  if (selection == null ) {
  println("Window was closed or the user hit cancel.");
  } else {
- println("User selected " + selection.getAbsolutePath());
+ println("File selected : " + selection.getAbsolutePath());
+ ChoosedFile = selection.getAbsolutePath();
  }
  }
- */
+
 
 /*
 //Version 3
-
-void mouseClicked() {
-  if (buttonSearch.over()) {
-    String fname = G4P.selectInput("Input Dialog", "svg", "Image files");
-    lblFile.setText(fname);
-    review = loadShape(fname);
-    shape(review, 500, 500);
-  }
-}
-*/
+ 
+ void mouseClicked() {
+ if (buttonSearch.over()) {
+ String fname = G4P.selectInput("Input Dialog", "svg", "Image files");
+ lblFile.setText(fname);
+ review = loadShape(fname);
+ shape(review, 500, 500);
+ }
+ }
+ */
 
 class Menufenster
 {
@@ -318,5 +362,4 @@ class ManConButtons
     rect(x, y, breite, hoehe, radius);
   }
 }
-
 
